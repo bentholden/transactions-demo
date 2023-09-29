@@ -20,10 +20,10 @@ import kotlin.test.assertNotNull
 @AutoConfigureTestDatabase
 @Import(value = [MockProducerFactoryConfig::class])
 @EmbeddedKafka(partitions = 1, topics = ["test.topic"], controlledShutdown = true)
-class KafkaTansactionsApplicationTests {
+class JpaTransactionFirstTests {
 
     @Autowired
-    private lateinit var kafkaProducerService: KafkaProducerService;
+    private lateinit var myService: MyService
 
     @Autowired
     private lateinit var kafkaRecordRepository: KafkaRecordRepository
@@ -35,14 +35,14 @@ class KafkaTansactionsApplicationTests {
     private lateinit var mockProducer: MockProducer<UUID, String>
 
     @Test
-    fun contextLoads() {
+    fun `Jpa entity is saved when kafka commit fails`() {
         mockProducer.commitTransactionException = RuntimeException("Oh no! a commit exception!!")
 
         val id = UUID.randomUUID()
         val message = "hello"
 
         assertThrows<RuntimeException> {
-            kafkaProducerService.sendMessageWithTransactional(id, message)
+            myService.sendMessageWithJpaFirst(id, message)
         }
 
         val dbRecord = kafkaRecordRepository.findByIdOrNull(id)
