@@ -1,7 +1,11 @@
 package no.holden.kafkatansactions
 
 import no.holden.kafkatansactions.db.KafkaRecordRepository
+import org.apache.kafka.clients.consumer.ConsumerConfig
+import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.MockProducer
+import org.apache.kafka.common.serialization.StringDeserializer
+import org.apache.kafka.common.serialization.UUIDDeserializer
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
@@ -11,6 +15,9 @@ import org.springframework.context.annotation.Import
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.kafka.test.EmbeddedKafkaBroker
 import org.springframework.kafka.test.context.EmbeddedKafka
+import org.springframework.kafka.test.utils.KafkaTestUtils
+import java.lang.IllegalStateException
+import java.time.Duration
 import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -48,5 +55,16 @@ class JpaTransactionFirstTests {
 
         assertNotNull(dbRecord)
         assertEquals(message, dbRecord.record)
+
+        // Setup kafka consumer
+        val consumerProps = KafkaTestUtils.consumerProps(UUID.randomUUID().toString(), "true", embeddedKafkaBroker)
+        consumerProps[ConsumerConfig.ISOLATION_LEVEL_CONFIG] = "read_committed"
+        val kafkaConsumer = KafkaConsumer(consumerProps, UUIDDeserializer(), StringDeserializer())
+        embeddedKafkaBroker.consumeFromEmbeddedTopics(kafkaConsumer, "test.topic")
+        // --------------------
+
+        assertThrows<IllegalStateException>(message = "No records found for topic") {
+            val kafkaRecord = KafkaTestUtils.getSingleRecord(kafkaConsumer, "test.topic", Duration.ofSeconds(2))
+        }
     }
 }
