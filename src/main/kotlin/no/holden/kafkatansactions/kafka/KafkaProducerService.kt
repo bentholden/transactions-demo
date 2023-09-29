@@ -10,7 +10,6 @@ import java.util.UUID
 @Service
 class KafkaProducerService(
     private val kafkaTemplate: KafkaTemplate<UUID, String>,
-    private val kafkaRecordRepository: KafkaRecordRepository
 ) {
     fun sendMessage(id: UUID, message: String) {
         kafkaTemplate.sendDefault(id, message)
