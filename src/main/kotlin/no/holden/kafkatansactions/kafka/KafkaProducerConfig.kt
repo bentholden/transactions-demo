@@ -2,7 +2,6 @@ package no.holden.kafkatansactions.kafka
 
 import org.apache.kafka.common.serialization.StringSerializer
 import org.apache.kafka.common.serialization.UUIDSerializer
-import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties
 import org.springframework.context.annotation.Bean
@@ -18,7 +17,7 @@ class KafkaProducerConfig {
     @Bean
     @ConditionalOnMissingBean
     fun producerFactory(
-        kafkaProperties: KafkaProperties
+        kafkaProperties: KafkaProperties,
     ): ProducerFactory<UUID, String> =
         DefaultKafkaProducerFactory(
             kafkaProperties.buildProducerProperties(),

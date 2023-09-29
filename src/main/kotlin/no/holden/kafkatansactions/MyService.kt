@@ -10,7 +10,7 @@ import java.util.UUID
 @Service
 class MyService(
     private val kafkaProducerService: KafkaProducerService,
-    private val kafkaRecordRepository: KafkaRecordRepository
+    private val kafkaRecordRepository: KafkaRecordRepository,
 ) {
     @Transactional
     fun sendMessageWithJpaFirst(id: UUID, message: String) {

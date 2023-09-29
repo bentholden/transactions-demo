@@ -5,5 +5,4 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface KafkaRecordRepository : JpaRepository<RecordEntity, UUID> {
-}
+interface KafkaRecordRepository : JpaRepository<RecordEntity, UUID>

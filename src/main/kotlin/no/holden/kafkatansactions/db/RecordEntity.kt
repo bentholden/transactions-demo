@@ -10,5 +10,5 @@ import java.util.UUID
 class RecordEntity(
     @Id
     val id: UUID,
-    val record: String
+    val record: String,
 )

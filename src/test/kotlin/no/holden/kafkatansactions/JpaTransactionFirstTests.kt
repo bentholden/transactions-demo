@@ -1,7 +1,6 @@
 package no.holden.kafkatansactions
 
 import no.holden.kafkatansactions.db.KafkaRecordRepository
-import no.holden.kafkatansactions.kafka.KafkaProducerService
 import org.apache.kafka.clients.producer.MockProducer
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows

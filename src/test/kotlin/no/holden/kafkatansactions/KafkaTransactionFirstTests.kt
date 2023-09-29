@@ -1,26 +1,25 @@
 package no.holden.kafkatansactions
 
 import no.holden.kafkatansactions.db.KafkaRecordRepository
-import no.holden.kafkatansactions.kafka.KafkaProducerService
 import org.apache.kafka.clients.consumer.ConsumerConfig
+import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.UUIDDeserializer
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.kafka.test.EmbeddedKafkaBroker
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.kafka.test.utils.KafkaTestUtils
-import java.util.UUID
-import org.apache.kafka.clients.consumer.KafkaConsumer
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.assertThrows
-import org.mockito.Mockito
-import org.springframework.boot.test.mock.mockito.MockBean
 import java.time.Duration
+import java.util.UUID
 import kotlin.test.assertNotNull
 
 
@@ -57,7 +56,7 @@ class KafkaTransactionFirstTests {
         val consumerProps = KafkaTestUtils.consumerProps(UUID.randomUUID().toString(), "true", embeddedKafkaBroker)
         consumerProps[ConsumerConfig.ISOLATION_LEVEL_CONFIG] = "read_committed"
         val kafkaConsumer = KafkaConsumer(consumerProps, UUIDDeserializer(), StringDeserializer())
-        embeddedKafkaBroker.consumeFromEmbeddedTopics(kafkaConsumer, "test.topic");
+        embeddedKafkaBroker.consumeFromEmbeddedTopics(kafkaConsumer, "test.topic")
         // --------------------
         val record = KafkaTestUtils.getSingleRecord(kafkaConsumer, "test.topic", Duration.ofSeconds(10))
 
