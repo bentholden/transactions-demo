@@ -9,6 +9,8 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.core.ProducerFactory
+import org.springframework.kafka.transaction.KafkaTransactionManager
+import org.springframework.transaction.support.TransactionTemplate
 import java.util.UUID
 
 @Configuration
@@ -31,5 +33,11 @@ class KafkaProducerConfig {
             .apply {
                 defaultTopic = "test.topic"
             }
+
+    @Bean
+    fun kafkaTransactionTemplate(producerFactory: ProducerFactory<UUID, String>): TransactionTemplate {
+        val kafkaTransactionManager = KafkaTransactionManager(producerFactory)
+        return TransactionTemplate(kafkaTransactionManager)
+    }
 
 }
