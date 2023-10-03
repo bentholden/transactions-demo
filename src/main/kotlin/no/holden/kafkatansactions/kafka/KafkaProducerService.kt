@@ -8,7 +8,7 @@ import java.util.UUID
 class KafkaProducerService(
     private val kafkaTemplate: KafkaTemplate<UUID, String>,
 ) {
-    fun sendMessage(id: UUID, message: String) {
-        kafkaTemplate.sendDefault(id, message)
+    fun sendMessage(topic: String, id: UUID, message: String) {
+        kafkaTemplate.send(topic, id, message)
     }
 }

@@ -25,7 +25,7 @@ import kotlin.test.assertNotNull
 @SpringBootTest
 @AutoConfigureTestDatabase
 @Import(value = [MockProducerFactoryConfig::class])
-@EmbeddedKafka(partitions = 1, topics = ["test.topic"], controlledShutdown = true)
+@EmbeddedKafka(partitions = 1, topics = ["internal.test.topic", "external.test.topic"], controlledShutdown = true)
 class JpaTransactionFirstTests {
 
     @Autowired
