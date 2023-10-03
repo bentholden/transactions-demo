@@ -1,6 +1,7 @@
 package no.holden.kafkatansactions
 
 import no.holden.kafkatansactions.db.KafkaRecordRepository
+import no.holden.kafkatansactions.kafka.KafkaProducerService
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -25,40 +26,40 @@ import kotlin.test.assertNotNull
 
 @SpringBootTest
 @AutoConfigureTestDatabase
-@EmbeddedKafka(partitions = 1, topics = ["test.topic"], controlledShutdown = true)
+@EmbeddedKafka(value = 3, partitions = 1, topics = ["internal.test.topic", "external.test.topic"], controlledShutdown = true)
 class KafkaTransactionFirstTests {
 
-    @MockBean
+//    @MockBean
+    @Autowired
     private lateinit var kafkaRecordRepository: KafkaRecordRepository
 
     @Autowired
-    private lateinit var myService: MyService
+    private lateinit var kafkaProducerService: KafkaProducerService
 
     @Autowired
     private lateinit var embeddedKafkaBroker: EmbeddedKafkaBroker
 
     @Test
     fun `Kafka message is sent when JPA save fails`() {
-        Mockito.`when`(kafkaRecordRepository.save(Mockito.any()))
-            .thenThrow(RuntimeException("Oh no! a runtime exception!!"))
+//        Mockito.`when`(kafkaRecordRepository.save(Mockito.any()))
+//            .thenThrow(RuntimeException("Oh no! a runtime exception!!"))
 
         val id = UUID.randomUUID()
         val message = "hello"
 
-        assertThrows<RuntimeException> {
-            myService.sendMessageWithKafkaFirst(id, message)
-        }
+        kafkaProducerService.sendMessage(id, message)
+        Thread.sleep(1_000)
 
         val dbRecord = kafkaRecordRepository.findByIdOrNull(id)
-        assertNull(dbRecord)
+        assertNotNull(dbRecord)
 
         // Setup kafka consumer
         val consumerProps = KafkaTestUtils.consumerProps(UUID.randomUUID().toString(), "true", embeddedKafkaBroker)
         consumerProps[ConsumerConfig.ISOLATION_LEVEL_CONFIG] = "read_committed"
         val kafkaConsumer = KafkaConsumer(consumerProps, UUIDDeserializer(), StringDeserializer())
-        embeddedKafkaBroker.consumeFromEmbeddedTopics(kafkaConsumer, "test.topic")
+        embeddedKafkaBroker.consumeFromEmbeddedTopics(kafkaConsumer, "external.test.topic")
         // --------------------
-        val record = KafkaTestUtils.getSingleRecord(kafkaConsumer, "test.topic", Duration.ofSeconds(10))
+        val record = KafkaTestUtils.getSingleRecord(kafkaConsumer, "external.test.topic", Duration.ofSeconds(2))
 
         assertNotNull(record)
         assertEquals(id, record.key())

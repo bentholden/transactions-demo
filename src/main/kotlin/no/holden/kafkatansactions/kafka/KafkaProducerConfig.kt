@@ -29,7 +29,7 @@ class KafkaProducerConfig {
     fun defaultKafkaEventTemplate(producerFactory: ProducerFactory<UUID, String>): KafkaTemplate<UUID, String> =
         KafkaTemplate(producerFactory)
             .apply {
-                defaultTopic = "test.topic"
+                defaultTopic = "internal.test.topic"
             }
 
 }
